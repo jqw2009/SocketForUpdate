@@ -9,28 +9,32 @@ namespace Server
 {
     public class Log
     {
+        private static readonly object obj = new object();
         public static void WriteLog(string msg)
         {
-            StreamWriter writer = null;
-            try
+            lock (obj)
             {
-                string path = AppDomain.CurrentDomain.BaseDirectory + "log";
-                string str2 = path + @"\" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
-                if (!Directory.Exists(path))
+                StreamWriter writer = null;
+                try
                 {
-                    Directory.CreateDirectory(path);
+                    string path = AppDomain.CurrentDomain.BaseDirectory + "log";
+                    string str2 = path + @"\" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+                    writer = new StreamWriter(str2, true);
+                    writer.WriteLine(System.DateTime.Now.ToString("HH:mm:ss")+ "\t"+msg);
                 }
-                writer = new StreamWriter(str2, true);
-                writer.WriteLine(msg);
-            }
-            catch (Exception)
-            {
-            }
-            finally
-            {
-                if (writer != null)
+                catch (Exception)
                 {
-                    writer.Close();
+                }
+                finally
+                {
+                    if (writer != null)
+                    {
+                        writer.Close();
+                    }
                 }
             }
         }

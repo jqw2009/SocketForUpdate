@@ -58,11 +58,12 @@ namespace Server
                         listIP.Remove(((IPEndPoint)ep).Address.ToString() + ":" + ((IPEndPoint)ep).Port);
                         break;
                 }
-            }
-            txtConnectIPs.Text = "";
-            foreach (string str in listIP)
-            {
-                txtConnectIPs.Text += str + "\r\n";
+
+                txtConnectIPs.Text = "";
+                foreach (string str in listIP)
+                {
+                    txtConnectIPs.Text += str + "\r\n";
+                }
             }
         }
 
@@ -200,6 +201,10 @@ namespace Server
             {
                 //Socket clientSocket = (Socket)mSocket;
                 string strClientFileInfo = "";
+                if (b_IsDebugLog)
+                {
+                    Log.WriteLog("开始接收客户端更新数据，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                }
                 while (true)
                 {
                     byte[] msg = new byte[Rate];
@@ -225,7 +230,10 @@ namespace Server
                         continue;
                     }
                     strClientFileInfo = strClientFileInfo.Substring(0, strClientFileInfo.Length - 1);//去掉结束符号
-
+                    if (b_IsDebugLog)
+                    {
+                        Log.WriteLog("接收客户端更新数据完毕，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                    }
                     if (!b_IsUpdate)
                     {
                         //停止更新 用0代表不更新
