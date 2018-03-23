@@ -209,14 +209,14 @@ namespace Server
                 {
                     byte[] msg = new byte[Rate];
                     int recvCount = clientSocket.Receive(msg, 0, Rate, SocketFlags.None);
-                    if (recvCount == 0)
+                    if (recvCount <= 0)
                     {
                         //0标识socket关闭了,那么就跳出结束此进程
                         showIP(clientSocket.RemoteEndPoint, 1);
                         //ChangeConnectCount(-1);
                         if (b_IsDebugLog)
                         {
-                            Log.WriteLog("客户端的连接正常关闭，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                            Log.WriteLog("客户端的连接正常关闭，recvCount为：" + recvCount + " IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
                         }
                         break;
                     }
@@ -296,9 +296,12 @@ namespace Server
                         }
                     }
                 }
-            }
-            catch (Exception )
+                //clientSocket.Shutdown(SocketShutdown.Both);
+                clientSocket.Close();
+            }                
+            catch (SocketException ex)
             {
+                clientSocket.Close();
                // throw;
                 //string result = "";
                 //listConnect.TryTake(out result);
@@ -306,7 +309,7 @@ namespace Server
                 //ChangeConnectCount(-1);
                 if (b_IsDebugLog)
                 {
-                    Log.WriteLog("客户端的连接发生异常，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                    Log.WriteLog("客户端的连接发生异常，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port+"\r\n 异常信息为："+ex.Message+ex.StackTrace+ex.InnerException);
                 }
             }
         }
