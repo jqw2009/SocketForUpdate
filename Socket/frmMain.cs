@@ -297,11 +297,11 @@ namespace Server
                     }
                 }
                 //clientSocket.Shutdown(SocketShutdown.Both);
-                clientSocket.Close();
+                //clientSocket.Close(); //报错了，可能是关闭socket的缘故，也有可能是线程池重复使用而socket又关闭了导致的，所以就拿掉socket
             }                
             catch (SocketException ex)
             {
-                clientSocket.Close();
+                //clientSocket.Close();
                // throw;
                 //string result = "";
                 //listConnect.TryTake(out result);

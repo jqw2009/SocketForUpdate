@@ -203,7 +203,7 @@
             this.cboxRate.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.cboxRate.FormattingEnabled = true;
             this.cboxRate.Items.AddRange(new object[] {
-            "5",
+            "8",
             "10",
             "15",
             "20",
@@ -244,7 +244,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "更新服务V20180323_1006";
+            this.Text = "更新服务V20180328_0856";
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
