@@ -205,10 +205,16 @@ namespace Server
                 {
                     Log.WriteLog("开始接收客户端更新数据，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
                 }
+                int index = 0;
                 while (true)
                 {
                     byte[] msg = new byte[Rate];
                     int recvCount = clientSocket.Receive(msg, 0, Rate, SocketFlags.None);
+                    if (b_IsDebugLog)
+                    {
+                        index++;
+                        Log.WriteLog("第"+index+"次接收客户端更新内容，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                    }
                     if (recvCount <= 0)
                     {
                         //0标识socket关闭了,那么就跳出结束此进程
