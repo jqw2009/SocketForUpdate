@@ -176,7 +176,10 @@ namespace Server
                     {
                         Log.WriteLog("获取到客户端的连接，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
                     }
-                    ThreadPool.QueueUserWorkItem(clientMsg, clientSocket);
+                    Thread td = new Thread(clientMsg);
+                    td.IsBackground = true;
+                    td.Start(clientSocket);
+                    //ThreadPool.QueueUserWorkItem(clientMsg, clientSocket);
                 }
             }
             catch (Exception ex)
@@ -197,6 +200,8 @@ namespace Server
         private void clientMsg(object mSocket)
         {
             Socket clientSocket = (Socket)mSocket;
+            //clientSocket.ReceiveTimeout = 10000;
+            //clientSocket.SendTimeout = 10000;
             try
             {
                 //Socket clientSocket = (Socket)mSocket;
@@ -231,9 +236,23 @@ namespace Server
                     //strClientFileInfo += Encoding.UTF8.GetString(msg, 0, recvCount);
                     //strClientFileInfo += Encoding.GetEncoding("GB2312").GetString(msg, 0, recvCount);
                     strClientFileInfo += Encoding.Unicode.GetString(msg, 0, recvCount);
-                    if (strClientFileInfo.Substring(strClientFileInfo.Length - 1, 1) != "?")//?表示结束符号，没有结束符号则继续接受数据
+                    if (recvCount < Rate)//当接收的数据小于指定的大小时，就要检查客户端来源的数据正确性了
                     {
-                        continue;
+                        if (strClientFileInfo.Substring(strClientFileInfo.Length - 1, 1) != "?")//?表示结束符号，没有结束符号则继续接受数据
+                        {
+                            if (b_IsDebugLog)
+                            {
+                                Log.WriteLog("客户端数据非法，退出，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                            }
+                            break;//当数据接收完毕的时候还没有?，说明客户端数据非法，直接退出
+                        }
+                    }
+                    else
+                    {
+                        if (strClientFileInfo.Substring(strClientFileInfo.Length - 1, 1) != "?")//?表示结束符号，没有结束符号则继续接受数据
+                        {
+                            continue;
+                        }
                     }
                     strClientFileInfo = strClientFileInfo.Substring(0, strClientFileInfo.Length - 1);//去掉结束符号
                     if (b_IsDebugLog)
@@ -303,11 +322,15 @@ namespace Server
                     }
                 }
                 //clientSocket.Shutdown(SocketShutdown.Both);
-                //clientSocket.Close(); //报错了，可能是关闭socket的缘故，也有可能是线程池重复使用而socket又关闭了导致的，所以就拿掉socket
+                clientSocket.Disconnect(true);
+                clientSocket.Close(); //报错了，可能是关闭socket的缘故，也有可能是线程池重复使用而socket又关闭了导致的，所以就拿掉socket
+                clientSocket.Dispose();
             }                
             catch (SocketException ex)
             {
-                //clientSocket.Close();
+                clientSocket.Disconnect(true);
+                clientSocket.Close(); //报错了，可能是关闭socket的缘故，也有可能是线程池重复使用而socket又关闭了导致的，所以就拿掉socket
+                clientSocket.Dispose();
                // throw;
                 //string result = "";
                 //listConnect.TryTake(out result);
