@@ -41,15 +41,18 @@ namespace Test
             while (true)
             {
                 Socket soc = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                IPAddress address = IPAddress.Parse("172.20.22.54");
+                IPAddress address = IPAddress.Parse("172.20.22.54");//172.20.22.54
                 soc = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 soc.Connect(new IPEndPoint(address, 8001));
                 //soc.Send(Encoding.Unicode.GetBytes("?"));
                 byte[] buffer=new byte[1024];
-                //Thread.Sleep(100);
+                Thread.Sleep(10000);
                 //int count = soc.Receive(buffer, 0, 1024, SocketFlags.None);
+                soc.Send(Encoding.Unicode.GetBytes("?"));
+                soc.Receive(buffer, 0, buffer.Length,SocketFlags.None);
+
                 Thread.Sleep(10);
-                 soc.Disconnect(true);
+                soc.Disconnect(false);
                 soc.Close();
                 soc.Dispose();
                 Thread.Sleep(10);

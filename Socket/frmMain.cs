@@ -200,8 +200,8 @@ namespace Server
         private void clientMsg(object mSocket)
         {
             Socket clientSocket = (Socket)mSocket;
-            //clientSocket.ReceiveTimeout = 10000;
-            //clientSocket.SendTimeout = 10000;
+            clientSocket.SendTimeout = 1000*60;
+            clientSocket.ReceiveTimeout = 1000*60;
             try
             {
                 //Socket clientSocket = (Socket)mSocket;
@@ -223,7 +223,7 @@ namespace Server
                     if (recvCount <= 0)
                     {
                         //0标识socket关闭了,那么就跳出结束此进程
-                        showIP(clientSocket.RemoteEndPoint, 1);
+                        //showIP(clientSocket.RemoteEndPoint, 1);
                         //ChangeConnectCount(-1);
                         if (b_IsDebugLog)
                         {
@@ -236,24 +236,29 @@ namespace Server
                     //strClientFileInfo += Encoding.UTF8.GetString(msg, 0, recvCount);
                     //strClientFileInfo += Encoding.GetEncoding("GB2312").GetString(msg, 0, recvCount);
                     strClientFileInfo += Encoding.Unicode.GetString(msg, 0, recvCount);
-                    if (recvCount < Rate)//当接收的数据小于指定的大小时，就要检查客户端来源的数据正确性了
+                    if (strClientFileInfo.Substring(strClientFileInfo.Length - 1, 1) != "?")//?表示结束符号，没有结束符号则继续接受数据
                     {
-                        if (strClientFileInfo.Substring(strClientFileInfo.Length - 1, 1) != "?")//?表示结束符号，没有结束符号则继续接受数据
-                        {
-                            if (b_IsDebugLog)
-                            {
-                                Log.WriteLog("客户端数据非法，退出，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
-                            }
-                            break;//当数据接收完毕的时候还没有?，说明客户端数据非法，直接退出
-                        }
+                        continue;
                     }
-                    else
-                    {
-                        if (strClientFileInfo.Substring(strClientFileInfo.Length - 1, 1) != "?")//?表示结束符号，没有结束符号则继续接受数据
-                        {
-                            continue;
-                        }
-                    }
+                    //if (recvCount < Rate)//当接收的数据小于指定的大小时，就要检查客户端来源的数据正确性了
+                    //{
+                    //    if (strClientFileInfo.Substring(strClientFileInfo.Length - 1, 1) != "?")//?表示结束符号，没有结束符号则继续接受数据
+                    //    {
+                    //        if (b_IsDebugLog)
+                    //        {
+                    //            Log.WriteLog("客户端数据非法，退出，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                    //            Log.WriteLog("非法数据：" + strClientFileInfo);
+                    //        }
+                    //        break;//当数据接收完毕的时候还没有?，说明客户端数据非法，直接退出
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    if (strClientFileInfo.Substring(strClientFileInfo.Length - 1, 1) != "?")//?表示结束符号，没有结束符号则继续接受数据
+                    //    {
+                    //        continue;
+                    //    }
+                    //}
                     strClientFileInfo = strClientFileInfo.Substring(0, strClientFileInfo.Length - 1);//去掉结束符号
                     if (b_IsDebugLog)
                     {
@@ -322,24 +327,21 @@ namespace Server
                     }
                 }
                 //clientSocket.Shutdown(SocketShutdown.Both);
-                clientSocket.Disconnect(true);
+                showIP(clientSocket.RemoteEndPoint, 1);
+                clientSocket.Disconnect(false);
                 clientSocket.Close(); //报错了，可能是关闭socket的缘故，也有可能是线程池重复使用而socket又关闭了导致的，所以就拿掉socket
                 clientSocket.Dispose();
             }                
             catch (SocketException ex)
             {
-                clientSocket.Disconnect(true);
-                clientSocket.Close(); //报错了，可能是关闭socket的缘故，也有可能是线程池重复使用而socket又关闭了导致的，所以就拿掉socket
-                clientSocket.Dispose();
-               // throw;
-                //string result = "";
-                //listConnect.TryTake(out result);
                 showIP(clientSocket.RemoteEndPoint, 1);
-                //ChangeConnectCount(-1);
                 if (b_IsDebugLog)
                 {
                     Log.WriteLog("客户端的连接发生异常，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port+"\r\n 异常信息为："+ex.Message+ex.StackTrace+ex.InnerException);
                 }
+                clientSocket.Disconnect(false);
+                clientSocket.Close(); //报错了，可能是关闭socket的缘故，也有可能是线程池重复使用而socket又关闭了导致的，所以就拿掉socket
+                clientSocket.Dispose();
             }
         }
 
