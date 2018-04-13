@@ -200,8 +200,8 @@ namespace Server
         private void clientMsg(object mSocket)
         {
             Socket clientSocket = (Socket)mSocket;
-            clientSocket.SendTimeout = 1000*60;
-            clientSocket.ReceiveTimeout = 1000*60;
+            //clientSocket.SendTimeout = 1000*60;
+            //clientSocket.ReceiveTimeout = 1000*60;
             try
             {
                 //Socket clientSocket = (Socket)mSocket;
@@ -218,7 +218,7 @@ namespace Server
                     if (b_IsDebugLog)
                     {
                         index++;
-                        Log.WriteLog("第"+index+"次接收客户端更新内容，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                        Log.WriteLog("第" + index + "次接收客户端更新内容 recvCount " + recvCount + "，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
                     }
                     if (recvCount <= 0)
                     {
@@ -266,6 +266,10 @@ namespace Server
                     }
                     if (!b_IsUpdate)
                     {
+                        if (b_IsDebugLog)
+                        {
+                            Log.WriteLog("发送不更新代码，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                        }
                         //停止更新 用0代表不更新
                         clientSocket.Send(Encoding.Unicode.GetBytes("0?"));
                         continue;
@@ -281,11 +285,19 @@ namespace Server
                             strClientFileInfo = "";//清空数据
                             if (version == clsConfig.updateversion)
                             {
+                                if (b_IsDebugLog)
+                                {
+                                    Log.WriteLog("发送版本相同的代码，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                                }
                                 clientSocket.Send(Encoding.Unicode.GetBytes("?"));
                                 continue;
                             }
                             else
                             {
+                                if (b_IsDebugLog)
+                                {
+                                    Log.WriteLog("发送服务器版本，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                                }
                                 string versioninfo = ":" + clsConfig.updateversion + "*" + clsConfig.updatetime + "*" + clsConfig.updatemsg + "?";
                                 clientSocket.Send(Encoding.Unicode.GetBytes(versioninfo));
                                 continue;
@@ -294,6 +306,10 @@ namespace Server
                     }
 
                     //检查需要更新的文件
+                    if (b_IsDebugLog)
+                    {
+                        Log.WriteLog("开始检查要更新的文件，IP为" + ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString() + ":" + ((IPEndPoint)clientSocket.RemoteEndPoint).Port);
+                    }
                     List<fileData> list = CheckUpdateFiles(strClientFileInfo);
                     if (list.Count > 0)
                     {
