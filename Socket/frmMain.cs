@@ -200,8 +200,8 @@ namespace Server
         private void clientMsg(object mSocket)
         {
             Socket clientSocket = (Socket)mSocket;
-            //clientSocket.SendTimeout = 1000*60;
-            //clientSocket.ReceiveTimeout = 1000*60;
+            clientSocket.SendTimeout = 1000*60;
+            clientSocket.ReceiveTimeout = 1000*60;
             try
             {
                 //Socket clientSocket = (Socket)mSocket;
